@@ -88,15 +88,32 @@ internal sealed class Plugin : BaseUnityPlugin
         foreach (var (guid, pluginInfo) in Chainloader.PluginInfos)
         {
             var assembly = pluginInfo?.Instance?.GetType().Assembly;
-            assembly?.GetCustomAttributes().ForEach(attribute =>
-            {
-                if (attribute is ModdedWardrobeSectionAttribute category)
-                {
-                    Sections.Add(category);
-                }
-            });
 
-            if (pluginInfo.Instance is not GorillaUnityPlugin gup) continue;
+            if (assembly != null)
+            {
+                try
+                {
+                    foreach (var attribute in assembly.GetCustomAttributes())
+                    {
+                        try
+                        {
+                            if (attribute is ModdedWardrobeSectionAttribute category)
+                            {
+                                Sections.Add(category);
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                }
+            }
+
+            if (pluginInfo.Instance is not GorillaUnityPlugin gup)
+                continue;
 
             ConfigEntry<bool> stateEntry = Config.Bind("State", pluginInfo.Metadata.GUID, true);
             gup._stateEntry = stateEntry;
